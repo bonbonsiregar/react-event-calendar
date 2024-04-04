@@ -2,6 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const mongodb = require('./model');
 const cors = require('cors')
+const PDFDocuments = require('pdfkit')
+const fs = require('fs');
+const XLSX = require('xlsx')
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -49,7 +52,7 @@ app.put('/events/:id', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-  
+
 //handle delete
 app.delete('/events/:id', async (req, res) => {
     try {
@@ -61,6 +64,56 @@ app.delete('/events/:id', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+app.get('/pdf', async (req, res) => {
+    try {
+    const { date } = req.query;
+    const events = await mongodb.find({ date });
+    console.log('RESSSS', events)
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="events_${date}.pdf"`);
+
+    const doc = new PDFDocuments();
+    
+    doc.pipe(res);
+
+    doc.fontSize(20).text(`Events for ${date}`, { align: 'center' });
+    events.forEach((event, index) => {
+      doc.fontSize(14).text(`${index + 1}. ${event.description}`);
+    });
+    doc.end();
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+app.get('/xls', async (req, res) => {
+    try {
+      const { date } = req.query;
+      const events = await mongodb.find({ date });
+  
+     
+      const ws = XLSX.utils.json_to_sheet(events.map(event => ({ Date: event.date, Description: event.description })));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Events');
+  
+      
+      const tempFilePath = `./temp/events_${date}.xlsx`;
+      XLSX.writeFile(wb, tempFilePath);
+  
+      
+      res.download(tempFilePath, `events_${date}.xlsx`, () => {
+        
+        fs.unlinkSync(tempFilePath);
+      });
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+app.use(cors())
   
 
 

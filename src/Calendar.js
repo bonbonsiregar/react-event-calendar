@@ -4,6 +4,8 @@ import 'react-calendar/dist/Calendar.css';
 import axios from './axiosconf';
 import moment from 'moment';
 import Event from './Event';
+//import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx'
 
 function MyCalendar() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -18,7 +20,7 @@ function MyCalendar() {
       const description = prompt('Enter event description:');
       if (description) {
         const newEvent = {
-          date: moment(selectedDate).format('DD/MM/YYYY'),
+          date: moment(selectedDate).format('DD-MM-YYYY'),
           description,
         };
         await axios.post('/events', newEvent);
@@ -29,20 +31,79 @@ function MyCalendar() {
     }
   };
 
+  const handlePDF = async () => {
+    try {
+      const response = await axios.get(`/pdf`, {
+        params: { date: moment(selectedDate).format('DD-MM-YYYY') },
+        responseType: 'blob'
+      });
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `events_${moment(selectedDate).format('DD-MM-YYYY')}.pdf`;
+  
+      document.body.appendChild(link);
+      link.click();
+  
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error('Error exporting to PDF:', error);
+    }
+  };
+
+  const handleExcel = async () => {
+    try {
+        const response = await axios.get(`/xls`, {
+          params: { date: moment(selectedDate).format('DD-MM-YYYY') },
+          responseType: 'arraybuffer', 
+        });
+    
+        
+        const blob = new Blob([response.data], { type: 'application/octet-stream' });
+    
+        
+        const url = window.URL.createObjectURL(blob);
+    
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `events_${moment(selectedDate).format('DD-MM-YYYY')}.xlsx`;
+    
+        
+        document.body.appendChild(link);
+        link.click();
+    
+        
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error exporting to Excel:', error);
+      }
+  };
+
   
 
   return (
     <div>
+    <h1 style={{ marginLeft: '10px' }}>REACT EVENT CALENDAR</h1>
       <div style={{ display: 'flex' }}>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, margin: '10px'}}>
           <Calendar
             onChange={handleDateChange}
             value={selectedDate}
           />
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 3 }}>
           <Event selectedDate={selectedDate}/>
           <button onClick={handleAddEvent}>Add Event</button>
+          <button onClick={handlePDF}>Export to PDF</button>
+          <button onClick={handleExcel}>Export to Excel</button>
         </div>
       </div>
     </div>

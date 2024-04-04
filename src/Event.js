@@ -13,7 +13,7 @@ function Event({ selectedDate }) {
       setLoading(true);
       try {
         const response = await axios.get('/events', {
-          params: { date: moment(selectedDate).format('DD/MM/YYYY') },
+          params: { date: moment(selectedDate).format('DD-MM-YYYY') },
         });
         setEvents(response.data);
       } catch (error) {
