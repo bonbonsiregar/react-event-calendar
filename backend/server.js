@@ -96,7 +96,10 @@ app.get('/xls', async (req, res) => {
     
         //console.log('EVENTS', events)
      
-      const ws = XLSX.utils.json_to_sheet(events.map(event => ({ Date: event.date, Description: event.description })));
+      const ws = XLSX.utils.json_to_sheet(events.map(event => 
+        console.log('EVENTEVENT', event)
+        ({ Date: event.date, Description: event.description })));
+
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Events');
   
