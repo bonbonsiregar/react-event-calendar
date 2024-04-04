@@ -88,11 +88,13 @@ app.get('/pdf', async (req, res) => {
     }
   });
 
+//untuk handle excel
 app.get('/xls', async (req, res) => {
     try {
       const { date } = req.query;
       const events = await mongodb.find({ date });
-  
+    
+        //console.log('EVENTS', events)
      
       const ws = XLSX.utils.json_to_sheet(events.map(event => ({ Date: event.date, Description: event.description })));
       const wb = XLSX.utils.book_new();
