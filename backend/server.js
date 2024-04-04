@@ -14,6 +14,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/eventcalendar', {
 app.use(express.json());
 app.use(cors())
 
+//handle get
 app.get('/events', async (req, res) => {
   try {
     const { date } = req.query;
@@ -24,6 +25,7 @@ app.get('/events', async (req, res) => {
   }
 });
 
+//handle input
 app.post('/events', async (req, res) => {
     try {
       const { date, description } = req.body;
@@ -34,6 +36,32 @@ app.post('/events', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+//handle update
+app.put('/events/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { description } = req.body;
+      const updatedEvent = await mongodb.findByIdAndUpdate(id, { description }, { new: true });
+      res.json(updatedEvent);
+    } catch (error) {
+      console.error('Error updating event:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+//handle delete
+app.delete('/events/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await mongodb.findByIdAndDelete(id);
+      res.sendStatus(204);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
 
 
 app.listen(PORT, () => {

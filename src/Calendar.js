@@ -3,6 +3,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import axios from './axiosconf';
 import moment from 'moment';
+import Event from './Event';
 
 function MyCalendar() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -40,12 +41,7 @@ function MyCalendar() {
           />
         </div>
         <div style={{ flex: 1 }}>
-          <h2>Events</h2>
-          <ul>
-            {events.map((event, index) => (
-              <li key={index}>{event.description}</li>
-            ))}
-          </ul>
+          <Event selectedDate={selectedDate}/>
           <button onClick={handleAddEvent}>Add Event</button>
         </div>
       </div>
