@@ -97,6 +97,7 @@ function MyCalendar() {
           <Calendar
             onChange={handleDateChange}
             value={selectedDate}
+            // defaultActiveStartDate={new Date()}
           />
         </div>
         <div style={{ flex: 3 }}>
