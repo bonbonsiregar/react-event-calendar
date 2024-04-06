@@ -46,10 +46,10 @@ function MyCalendar() {
       link.href = url;
       link.download = `events_${moment(selectedDate).format('DD-MM-YYYY')}.pdf`;
   
-      document.body.appendChild(link);
+      // document.body.appendChild(link);
       link.click();
   
-      document.body.removeChild(link);
+      // document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
     } catch (error) {
@@ -76,11 +76,11 @@ function MyCalendar() {
         link.download = `events_${moment(selectedDate).format('DD-MM-YYYY')}.xlsx`;
     
         
-        document.body.appendChild(link);
+        // document.body.appendChild(link);
         link.click();
     
         
-        document.body.removeChild(link);
+        // document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       } catch (error) {
         console.error('Error exporting to Excel:', error);
