@@ -3,5 +3,6 @@
 how to run:
 
 1. install mongodb compass, connect to db using connection string `mongodb://localhost:27017/eventcalendar` no username, no password
-2. npm install and wait
-3. just npm start 
+2. import the eventcalendar.events.json to mongodb
+3. npm install and wait
+4. just npm start 
