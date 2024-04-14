@@ -5,11 +5,12 @@ import moment from 'moment';
 function Event({ selectedDate }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [editingEventId, setEditingEventId] = useState(null);
+  const [editEventDescription, setEditEventDescription] = useState('');
 
   useEffect(() => {
     const fetchEvents = async () => {
       if (!selectedDate) return;
-
       setLoading(true);
       try {
         const response = await axios.get('/events', {
@@ -22,20 +23,21 @@ function Event({ selectedDate }) {
         setLoading(false);
       }
     };
-
     fetchEvents();
   }, [selectedDate]);
 
-  const handleEditEvent = async (eventId, newDescription) => {
+  const handleEditEvent = async (eventId) => {
     try {
-      await axios.put(`/events/${eventId}`, { description: newDescription });
-      const updatedEvents = events.map(event => {
+      await axios.put(`/events/${eventId}`, { description: editEventDescription });
+      const updatedEvents = events.map((event) => {
         if (event._id === eventId) {
-          return { ...event, description: newDescription };
+          return { ...event, description: editEventDescription };
         }
         return event;
       });
       setEvents(updatedEvents);
+      setEditingEventId(null);
+      setEditEventDescription('');
     } catch (error) {
       console.error('Error editing event:', error);
     }
@@ -44,10 +46,25 @@ function Event({ selectedDate }) {
   const handleDeleteEvent = async (eventId) => {
     try {
       await axios.delete(`/events/${eventId}`);
-      const updatedEvents = events.filter(event => event._id !== eventId);
+      const updatedEvents = events.filter((event) => event._id !== eventId);
       setEvents(updatedEvents);
     } catch (error) {
       console.error('Error deleting event:', error);
+    }
+  };
+
+  const handleEditButtonClick = (eventId, description) => {
+    if (editingEventId === eventId) {
+      handleEditEvent(eventId);
+    } else {
+      setEditingEventId(eventId);
+      setEditEventDescription(description);
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleEditEvent(editingEventId);
     }
   };
 
@@ -65,8 +82,20 @@ function Event({ selectedDate }) {
           {events.length > 0 ? (
             events.map((event) => (
               <li key={event._id}>
-                {event.description}
-                <button onClick={() => handleEditEvent(event._id, prompt('Enter new description:', event.description))}>Edit</button>
+                {editingEventId === event._id ? (
+                  <input
+                    type="text"
+                    value={editEventDescription}
+                    onChange={(e) => setEditEventDescription(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    style={{ marginRight: '10px' }}
+                  />
+                ) : (
+                  event.description
+                )}
+                <button onClick={() => handleEditButtonClick(event._id, event.description)}>
+                  {editingEventId === event._id ? 'Save' : 'Edit'}
+                </button>
                 <button onClick={() => handleDeleteEvent(event._id)}>Delete</button>
               </li>
             ))
